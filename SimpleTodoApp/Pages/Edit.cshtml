@@ -1,0 +1,13 @@
+﻿@page
+@model EditModel
+@{
+    ViewData["Title"] = "Edit todo";
+}
+
+<h4>Edit a todo : @Model.EditTodo.Description</h4>
+<form asp-page="Edit" method="post" class="form-inline">
+    <input type="hidden" name="Id" value="@Model.EditTodo.Id" />
+    <input type="text" id="Description" name="Description" class="form-control" placeholder="Description" />
+    <div asp-validation-summary="All"></div>
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-save"></span> Update</button>
+</form>

@@ -1,0 +1,50 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<h1>Todo List</h1>
+<h4>Add a todo</h4>
+<form asp-page="Index" method="post" class="form-inline">
+    <input type="text" id="Description" name="Description" class="form-control" placeholder="Description" />
+    <div asp-validation-summary="All"></div>
+    <button type="submit" style="margin-bottom: 20px" class="btn btn-primary"><span class="bi bi-plus-circle"></span> Add</button>
+</form>
+<h4>Current Todo's</h4>
+
+@if (!Model.Todos.Any())
+{
+    <p class="empty">The list is empty</p>
+}
+else
+{
+    <ul class="list-unstyled">
+        @foreach (var todo in Model.Todos)
+        {
+            <li>
+                <form method="post" asp-page="Index" asp-page-handler="Remove" style="display: inline">
+                    <input type="hidden" name="Id" value="@todo.Id" />
+                    <button type="submit" class="btn btn-link"><span class="bi bi-trash"></span></button>
+                </form>
+                <form method="post" asp-page="Index" asp-page-handler="Edit" style="display: inline">
+                    <input type="hidden" name="Id" value="@todo.Id" />
+                    <button type="submit" class="btn btn-link"><span class="bi bi-pencil"></span></button>
+                </form>
+                @todo.Description
+            </li>
+        }
+    </ul>
+}
+<style>
+    .validation-summary-errors ul {
+        list-style-type: none;
+        color: red;
+        padding: 0;
+        margin: 0;
+    }
+
+    .empty {
+        color: lightgray;
+    }
+</style>

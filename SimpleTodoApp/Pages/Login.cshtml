@@ -1,0 +1,15 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Sign in</p>
+<form asp-page="Login" method="post" class="form-inline">
+    <input type="text" id="Name" name="Name" class="form-control" placeholder="Name" />
+    <input style="margin-top: 5px" min="0" type="password" id="Password" name="Password" class="form-control" placeholder="Password" />
+    <br />
+    <div asp-validation-summary="All" style="color:red"></div>
+    <button type="submit" class="btn btn-primary">Login/Sign in</button>
+</form>

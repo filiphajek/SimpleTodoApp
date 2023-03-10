@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using SimpleTodoApp;
+using SimpleTodoApp.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,7 @@ builder.Services.AddAuthentication("default").AddCookie("default", c =>
 {
     c.Cookie.Name = "todo-cookie";
     c.Cookie.SameSite = SameSiteMode.Lax;
-    c.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    c.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     c.LoginPath = "/Login";
     c.LogoutPath = "/Logout";
 });
@@ -41,7 +42,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -51,4 +51,15 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
+using var scope = app.Services.CreateScope();
+var dbContext = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
+
+if (await dbContext.Database.EnsureCreatedAsync())
+{
+    var user = await dbContext.AddAsync(new User { Name = "Tom", Password = BCrypt.Net.BCrypt.HashPassword("123") });
+    await dbContext.SaveChangesAsync();
+
+    await dbContext.AddAsync(new TodoItem { Description = "First item", UserId = user.Entity.Id });
+    await dbContext.SaveChangesAsync();
+}
 app.Run();

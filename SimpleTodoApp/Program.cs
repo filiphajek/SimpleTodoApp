@@ -1,6 +1,6 @@
+using Azure.Data.Tables;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using SimpleTodoApp;
 using SimpleTodoApp.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,9 +29,45 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
-builder.Services.AddDbContext<TodoDbContext>(options =>
+var tableServiceClient = new TableServiceClient(builder.Configuration.GetConnectionString("Default"));
+var tableClient = tableServiceClient.GetTableClient(nameof(TodoItem));
+await tableClient.CreateIfNotExistsAsync();
+builder.Services.AddSingleton(tableClient);
+
+//seeds:
+await tableClient.UpsertEntityAsync<User>(new()
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+    Id = 1,
+    Name = "Tom",
+    Password = BCrypt.Net.BCrypt.HashPassword("123"),
+    PartitionKey = "Tom"
+});
+
+await tableClient.UpsertEntityAsync<TodoItem>(new()
+{
+    Id = 1,
+    Description = "Todo item 1",
+    Timestamp = DateTime.Now,
+    PartitionKey = "Tom",
+    RowKey = "0001",
+});
+
+await tableClient.UpsertEntityAsync<TodoItem>(new()
+{
+    Id = 2,
+    Description = "Todo item 2",
+    Timestamp = DateTime.Now,
+    PartitionKey = "Tom",
+    RowKey = "0002",
+});
+
+await tableClient.UpsertEntityAsync<TodoItem>(new()
+{
+    Id = 3,
+    Description = "Todo item 3",
+    Timestamp = DateTime.Now,
+    PartitionKey = "Tom",
+    RowKey = "0003",
 });
 
 var app = builder.Build();
@@ -51,15 +87,4 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-using var scope = app.Services.CreateScope();
-var dbContext = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
-
-if (await dbContext.Database.EnsureCreatedAsync())
-{
-    var user = await dbContext.AddAsync(new User { Name = "Tom", Password = BCrypt.Net.BCrypt.HashPassword("123") });
-    await dbContext.SaveChangesAsync();
-
-    await dbContext.AddAsync(new TodoItem { Description = "First item", UserId = user.Entity.Id });
-    await dbContext.SaveChangesAsync();
-}
 app.Run();

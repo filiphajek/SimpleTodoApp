@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Data.Tables;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using SimpleTodoApp.Entities;
 using System.Security.Claims;
 
@@ -8,23 +8,25 @@ namespace SimpleTodoApp.Pages
 {
     public class EditModel : PageModel
     {
-        private readonly TodoDbContext dbContext;
+        private readonly TableClient tableClient;
 
-        public EditModel(TodoDbContext dbContext)
+        public EditModel(TableClient tableClient)
         {
-            this.dbContext = dbContext;
+            this.tableClient = tableClient;
         }
 
         public TodoItem EditTodo { get; private set; } = default!;
 
         public async Task OnGetAsync(int id)
         {
-            EditTodo = await dbContext.Todos.FirstAsync(i => i.Id == id);
+            var nameClaimValue = User.FindFirstValue(ClaimTypes.Name)!;
+            var idStr = id.ToString();
+            var prefix = string.Join("", Enumerable.Repeat("0", 4 - idStr.Length));
+            EditTodo = await tableClient.GetEntityAsync<TodoItem>(nameClaimValue, prefix + id);
         }
 
         public async Task<IActionResult> OnPostAsync(TodoItem todo)
         {
-            todo.UserId = int.Parse(User.FindFirstValue("userId")!);
             if (string.IsNullOrEmpty(todo.Description))
             {
                 ModelState.Clear();
@@ -32,8 +34,12 @@ namespace SimpleTodoApp.Pages
                 return RedirectToPage(new { id = todo.Id });
             }
 
-            dbContext.Update(todo);
-            await dbContext.SaveChangesAsync();
+            todo.PartitionKey = User.FindFirstValue(ClaimTypes.Name)!;
+            var idStr = todo.Id.ToString();
+            var prefix = string.Join("", Enumerable.Repeat("0", 4 - idStr.Length));
+            todo.RowKey = prefix + idStr;
+
+            await tableClient.UpsertEntityAsync(todo);
             return RedirectToPage("Index");
         }
     }

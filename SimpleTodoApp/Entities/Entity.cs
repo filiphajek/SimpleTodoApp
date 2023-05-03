@@ -1,6 +1,9 @@
-﻿namespace SimpleTodoApp.Entities;
+﻿using Azure;
+using Azure.Data.Tables;
 
-public interface IEntity
+namespace SimpleTodoApp.Entities;
+
+public interface IEntity : ITableEntity
 {
     int Id { get; }
 }
@@ -8,4 +11,8 @@ public interface IEntity
 public class Entity : IEntity
 {
     public int Id { get; set; }
+    public string PartitionKey { get; set; } = string.Empty;
+    public string RowKey { get; set; } = string.Empty;
+    public DateTimeOffset? Timestamp { get; set; }
+    public ETag ETag { get; set; }
 }

@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Azure.Data.Tables;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using SimpleTodoApp.Entities;
 using System.Security.Claims;
 
@@ -9,11 +9,11 @@ namespace SimpleTodoApp.Pages
 {
     public class LoginModel : PageModel
     {
-        private readonly TodoDbContext dbContext;
+        private readonly TableClient tableClient;
 
-        public LoginModel(TodoDbContext dbContext)
+        public LoginModel(TableClient tableClient)
         {
-            this.dbContext = dbContext;
+            this.tableClient = tableClient;
         }
 
         public async Task<IActionResult> OnPostAsync(User user)
@@ -23,34 +23,34 @@ namespace SimpleTodoApp.Pages
                 return RedirectToPage();
             }
 
-            var existingUser = await dbContext.Users.FirstOrDefaultAsync(i => i.Name == user.Name);
-            if (existingUser is not null)
+            var existingUser = await tableClient.GetEntityIfExistsAsync<User>(user.Name, string.Empty);
+            if (existingUser.HasValue)
             {
-                if (BCrypt.Net.BCrypt.Verify(user.Password, existingUser.Password))
+                if (BCrypt.Net.BCrypt.Verify(user.Password, existingUser.Value.Password))
                 {
-                    await SignInAsync(existingUser.Id, existingUser.Name);
+                    await SignInAsync(existingUser.Value.Name);
                     return RedirectToPage("/Index");
                 }
                 ModelState.AddModelError(nameof(user.Name), "Wrong password");
                 return Page();
             }
 
-            var userEntity = await dbContext.Users.AddAsync(new User
+            var userEntity = new User
             {
                 Name = user.Name,
+                PartitionKey = user.Name,
                 Password = BCrypt.Net.BCrypt.HashPassword(user.Password)
-            });
-            await dbContext.SaveChangesAsync();
-            await SignInAsync(userEntity.Entity.Id, userEntity.Entity.Name);
+            };
+            await tableClient.AddEntityAsync(userEntity);
+            await SignInAsync(userEntity.Name);
             return RedirectToPage("/Index");
         }
 
-        private async Task SignInAsync(int id, string name)
+        private async Task SignInAsync(string name)
         {
             await HttpContext.SignInAsync("default", new ClaimsPrincipal(
                 new ClaimsIdentity(new[]
                 {
-                    new Claim("userId", id.ToString()),
                     new Claim(ClaimTypes.Name, name),
                 }, "default")),
                 new AuthenticationProperties

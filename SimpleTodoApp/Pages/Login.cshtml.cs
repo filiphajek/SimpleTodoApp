@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using SimpleTodoApp.Entities;
+using SimpleTodoApp.DAL;
 using System.Security.Claims;
 
 namespace SimpleTodoApp.Pages

@@ -4,10 +4,18 @@
     ViewData["Title"] = "Home page";
 }
 
+<h2>Send notifications about deadlines to this email</h2>
+<form method="post" asp-page="Index" asp-page-handler="EditMail" style="display: inline">
+    <input type="email" id="Email" value="@Model.UserModel.Email" name="Email" class="form-control mb-2" placeholder="Email" />
+    <button type="submit" style="margin-bottom: 20px" class="btn btn-primary"><span class="bi bi-plus-circle"></span> Save</button>
+</form>
+<br />
+
 <h1>Todo List</h1>
 <h4>Add a todo</h4>
 <form asp-page="Index" method="post" class="form-inline">
-    <input type="text" id="Description" name="Description" class="form-control" placeholder="Description" />
+    <input type="text" id="Description" name="Description" class="form-control mb-1" placeholder="Description" />
+    <input type="date" id="Deadline" name="Deadline" class="form-control" placeholder="Deadline" value="2023-06-01" />
     <div asp-validation-summary="All"></div>
     <button type="submit" style="margin-bottom: 20px" class="btn btn-primary"><span class="bi bi-plus-circle"></span> Add</button>
 </form>
@@ -23,15 +31,24 @@ else
         @foreach (var todo in Model.Todos)
         {
             <li>
-                <form method="post" asp-page="Index" asp-page-handler="Remove" style="display: inline">
-                    <input type="hidden" name="Id" value="@todo.Id" />
-                    <button type="submit" class="btn btn-link"><span class="bi bi-trash"></span></button>
-                </form>
-                <form method="post" asp-page="Index" asp-page-handler="Edit" style="display: inline">
-                    <input type="hidden" name="Id" value="@todo.Id" />
-                    <button type="submit" class="btn btn-link"><span class="bi bi-pencil"></span></button>
-                </form>
-                @todo.Description
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <form method="post" asp-page="Index" asp-page-handler="Remove" style="display: inline">
+                                <input type="hidden" name="Id" value="@todo.Id" />
+                                <button type="submit" class="btn btn-link"><span class="bi bi-trash"></span></button>
+                            </form>
+                            <form method="post" asp-page="Index" asp-page-handler="Edit" style="display: inline">
+                                <input type="hidden" name="Id" value="@todo.Id" />
+                                <button type="submit" class="btn btn-link"><span class="bi bi-pencil"></span></button>
+                            </form>
+                            @todo.Description
+                        </div>
+                        <div class="col">
+                            <strong>@todo.Deadline</strong>
+                        </div>
+                    </div>
+                </div>
             </li>
         }
     </ul>

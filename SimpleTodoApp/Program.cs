@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using SimpleTodoApp;
-using SimpleTodoApp.Entities;
+using SimpleTodoApp.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,10 +55,10 @@ var dbContext = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
 
 if (await dbContext.Database.EnsureCreatedAsync())
 {
-    var user = await dbContext.AddAsync(new User { Name = "Tom", Password = BCrypt.Net.BCrypt.HashPassword("123") });
+    var user = await dbContext.AddAsync(new User { Name = "Tom", Email = "filiphajek268@gmail.com", Password = BCrypt.Net.BCrypt.HashPassword("123") });
     await dbContext.SaveChangesAsync();
 
-    await dbContext.AddAsync(new TodoItem { Description = "First item", UserId = user.Entity.Id });
+    await dbContext.AddAsync(new TodoItem { Description = "First item", UserId = user.Entity.Id, Deadline = DateTime.UtcNow.AddHours(10) });
     await dbContext.SaveChangesAsync();
 }
 app.Run();

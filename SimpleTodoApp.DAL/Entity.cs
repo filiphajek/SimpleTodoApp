@@ -1,4 +1,4 @@
-﻿namespace SimpleTodoApp.Entities;
+﻿namespace SimpleTodoApp.DAL;
 
 public interface IEntity
 {

@@ -7,7 +7,8 @@
 <h4>Edit a todo : @Model.EditTodo.Description</h4>
 <form asp-page="Edit" method="post" class="form-inline">
     <input type="hidden" name="Id" value="@Model.EditTodo.Id" />
-    <input type="text" id="Description" name="Description" class="form-control" placeholder="Description" />
+    <input type="text" id="Description" name="Description" class="form-control mb-1" placeholder="Description" />
+    <input type="date" id="Deadline" name="Deadline" class="form-control" placeholder="Deadline" value="2023-06-01" />
     <div asp-validation-summary="All"></div>
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-save"></span> Update</button>
 </form>

@@ -14,7 +14,7 @@ public class CheckTodoItemDeadlinesFunction
     }
 
     [FunctionName("CheckTodoItemDeadlines")]
-    public async Task Run([TimerTrigger("0 */60 * * * *")] TimerInfo myTimer)
+    public async Task Run([TimerTrigger("0 */1 * * * *")] TimerInfo myTimer)
     {
         await notificationService.SendNotificationsToServiseBus();
     }

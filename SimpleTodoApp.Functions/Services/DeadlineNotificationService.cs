@@ -38,7 +38,7 @@ public class DeadlineNotificationService
     {
         var todoItems = await dbContext.Todos
             .Include(i => i.User)
-            .Where(i => i.Deadline >= DateTime.UtcNow && i.Deadline <= DateTime.UtcNow.AddDays(2))
+            .Where(i => i.Deadline >= DateTime.UtcNow && i.Deadline <= DateTime.UtcNow.AddDays(3))
             .ToListAsync();
 
         return todoItems.Select(i => new TodoItemUserNotification

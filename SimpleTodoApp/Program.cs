@@ -31,7 +31,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddDbContext<TodoDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+    options.UseInMemoryDatabase("TodoDb");
 });
 
 var app = builder.Build();
